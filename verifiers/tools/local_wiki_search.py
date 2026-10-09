@@ -4,12 +4,9 @@ import os
 def is_pyserini_available():
     try:
         import pyserini
-
         return True
     except ImportError:
         return False
-
-
 if is_pyserini_available():
     os.environ["JAVA_OPTS"] = "-Xms16g -Xmx32g " "-XX:MaxDirectMemorySize=16g "
 
@@ -28,7 +25,6 @@ else:
 
 def wiki_search(query: str) -> str:
     """Searches Wikipedia and returns the top matching article content."""
-
     if not PYSERINI_LOADED:
         return "Error: Pyserini is not available or failed to initialize."
 
@@ -36,15 +32,11 @@ def wiki_search(query: str) -> str:
         hits = _searcher.search(query, k=1)
         if not hits:
             return "No relevant Wikipedia content found."
-
         doc = _searcher.doc(hits[0].docid)
         contents = json.loads(doc.raw())["contents"]
-
         return contents
-
     except Exception as e:
         return f"Error during search: {e}"
-
-
 if __name__ == "__main__":
     print(wiki_search("What is the capital of France?"))
+

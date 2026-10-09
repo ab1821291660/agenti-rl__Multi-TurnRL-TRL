@@ -1,9 +1,8 @@
 import argparse
-import verifiers as vf
-
-from verifiers.tools import wiki_search
-from verifiers.prompts import DEFAULT_TRIVIALQA_TOOL_PROMPT_TEMPLATE
-from verifiers.rubrics import TrivialQAToolRubric
+import verifiers as vf ##===================================
+from verifiers.tools import wiki_search ##===================================
+from verifiers.prompts import DEFAULT_TRIVIALQA_TOOL_PROMPT_TEMPLATE##===================================
+from verifiers.rubrics import TrivialQAToolRubric ##===================================
 
 
 parser = argparse.ArgumentParser(description='Run TriviaQA search example with MT-GRPO')
@@ -13,33 +12,34 @@ parser.add_argument('--learning_rate', type=float, default=1e-6, help='Learning 
 parser.add_argument('--num_generations', type=int, default=21, help='Rollouts per prompt (default: 21)')
 parser.add_argument('--per_device_train_batch_size', type=int, default=12, help='Per device train batch size (default: 12)')
 parser.add_argument('--grad_accum_steps', type=int, default=4, help='Gradient accumulation steps (default: 4)')
-parser.add_argument('--num_iterations', type=int, default=2, help='Number of iterations (default: 2)')
-parser.add_argument('--max_steps', type=int, default=200, help='Maximum number of training steps (default: 200)')
+parser.add_argument('--num_iterations', type=int, default=2, help='Number of iterations (default: 2)')##===================================
+parser.add_argument('--max_steps', type=int, default=200, help='Maximum number of training steps (default: 200)')##===================================
 parser.add_argument('--beta', type=float, default=0.01, help='Beta parameter for KL divergence (default: 0.01)')
+
 parser.add_argument('--trainer', type=str, default="mt_grpo", choices=["mt_grpo", "grpo"], help='Trainer type (default: mt_grpo)')
-parser.add_argument('--no_turn_reward', action="store_true", help='Use turn reward (default: True)')
+parser.add_argument('--no_turn_reward', action="store_true", help='Use turn reward (default: True)')#3默认用----除非显式指定--no_turn_reward \则不用
 parser.add_argument('--turn_advantage_coef', type=float, default=1.0, help='Coefficient for turn-level advantage (default: 1.0)')
 args = parser.parse_args()
+
 
 model_name = args.model_name
 model, tokenizer = vf.get_model_and_tokenizer(model_name)
 
+
 vf_env = vf.ToolEnv(
-    dataset="triviaqa",
-    tools=[wiki_search],
-    system_prompt=DEFAULT_TRIVIALQA_TOOL_PROMPT_TEMPLATE,
+    dataset="triviaqa",##===================================##===================================
+    tools=[wiki_search],##===================================
+    system_prompt=DEFAULT_TRIVIALQA_TOOL_PROMPT_TEMPLATE,##===================================
     max_steps=2
 )
+train_dataset = vf_env.get_dataset()##===================================##===================================
 
-train_dataset = vf_env.get_dataset()
 
 rubric_class = TrivialQAToolRubric()
-
 turn_reward_funcs = [
     rubric_class.tool_execution_reward_func,
     rubric_class.exist_answer_in_search_results,
 ]
-
 outcome_reward_funcs = [
     rubric_class.exist_answer_reward_func,
     rubric_class.exact_match_reward_func,

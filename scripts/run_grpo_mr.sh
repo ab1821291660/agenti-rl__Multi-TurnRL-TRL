@@ -7,6 +7,9 @@ export WANDB_PROJECT=
 # Activate the environment
 source activate verifier_env
 
+
+
+
 # Default values for command-line arguments
 MODEL_NAME=${1:-"Qwen/Qwen2.5-7B"}
 LEARNING_RATE=${2:-"1e-6"}
@@ -35,6 +38,9 @@ elif [ ${NUM_GPUS} -eq 4 ]; then
     echo "Using 4 GPU configuration with NUM_GENERATIONS=${NUM_GENERATIONS}, PER_DEVICE_TRAIN_BATCH_SIZE=${PER_DEVICE_TRAIN_BATCH_SIZE}"
 fi
 
+
+
+
 # Display configuration
 echo "Using ${NUM_GPUS_MINUS_1} GPUs for training and 1 GPU for rollout generation with model ${MODEL_NAME}"
 
@@ -51,3 +57,17 @@ accelerate launch --config-file configs/zero3.yaml --num-processes ${NUM_GPUS_MI
     --max_steps ${MAX_STEPS} \
     --beta ${BETA} \
     --trainer "grpo" \
+          ## bash scripts/run_grpo_mr.sh
+          #accelerate launch --config-file configs/zero3.yaml --num-processes 7 \
+          #    verifiers/examples/triviaqa_search.py \   ##===================================
+          #    --model_name "Qwen/Qwen2.5-7B" \
+          #    --num_gpus 8 \
+          #    --learning_rate 1e-6 \
+          #    --num_generations 21 \
+          #    --per_device_train_batch_size 12 \
+          #    --grad_accum_steps 4 \
+          #    --num_iterations 2 \
+          #    --max_steps 300 \
+          #    --beta 0 \
+          #    --trainer "grpo" \
+

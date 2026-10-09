@@ -2,9 +2,8 @@ from typing import List, Dict
 
 from verifiers.parsers import XMLParser
 from verifiers.rubrics import Rubric
-from verifiers.rubrics import ToolRubric
-
-class TrivialQAToolRubric(ToolRubric):
+from verifiers.rubrics import ToolRubric##===================================
+class TrivialQAToolRubric(ToolRubric):##===================================
     def __init__(self,
                  parser: XMLParser = XMLParser(fields=["reasoning", ("tool", "answer")]),
                  env_parser: XMLParser = XMLParser(fields=["result"])):

@@ -20,6 +20,8 @@ dependencies = [
   "peft",
   "wandb",
   "rich",
+
+
   "duckduckgo-search",
   "liger-kernel",
   "vllm",
