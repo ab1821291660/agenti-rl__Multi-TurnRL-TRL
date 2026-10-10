@@ -5,17 +5,18 @@ from typing import List, Dict, Any, Callable
 from datasets import Dataset
 from trl.trainer.grpo_trainer import RewardFunc
 
-from verifiers.envs.multiturn_env import MultiTurnEnv
+from verifiers.envs.multiturn_env import MultiTurnEnv##===================================
 from verifiers.parsers import XMLParser
 from verifiers.prompts import DEFAULT_TOOL_PROMPT_TEMPLATE
-from verifiers.rubrics import ToolRubric
+
+from verifiers.rubrics import ToolRubric##===================================
 from verifiers.utils import preprocess_dataset
 
 def infer_schema_from_function(func: Callable) -> Dict[str, Any]:
     """Infers a tool schema from a function's signature and docstring."""
     sig = inspect.signature(func)
+
     doc = inspect.getdoc(func) or ""
-    
     # Parse docstring sections
     doc_parts = doc.split("\n\n")
     description = doc_parts[0].strip()
@@ -44,11 +45,11 @@ def infer_schema_from_function(func: Callable) -> Dict[str, Any]:
             args[name]["default"] = param.default
     
     return {
-        "name": func.__name__,
-        "description": description,
-        "args": args,
+        "name": func.__name__,##===================================
+        "description": description,##===================================
+        "args": args,##===================================
         "returns": str(sig.return_annotation.__name__ if sig.return_annotation != inspect.Parameter.empty else "any"),
-        "examples": examples
+        "examples": examples##===================================
     }
 
 def format_tool_descriptions(schemas: List[Dict[str, Any]]) -> str:
@@ -66,57 +67,56 @@ def format_tool_descriptions(schemas: List[Dict[str, Any]]) -> str:
             desc.append("\nExamples:")
             for example in schema['examples']:
                 desc.append(f"  {example}")
-        
         descriptions.append("\n".join(desc))
-    
     return "\n\n".join(descriptions)
 
 class ToolEnv(MultiTurnEnv):
     def __init__(self,
-                 dataset: str = "gsm8k",
-                 tools: List[Callable] = [],
-                 system_prompt: str = DEFAULT_TOOL_PROMPT_TEMPLATE,
+                 dataset: str = "gsm8k",##triviaqa ##===================================
+                 tools: List[Callable] = [],##===================================
+                 system_prompt: str = DEFAULT_TOOL_PROMPT_TEMPLATE,##===================================
                  few_shot: List[Dict[str, str]] = [],
                  sampling_args={
                      "stop": ["</tool>", "</answer>"],
                      "include_stop_str_in_output": True
                  },
                  mask_env_response: bool = True,
-                 max_steps: int = 10, **kwargs):
+                 max_steps: int = 10, **kwargs):#2##===================================
         # Infer schemas from tool functions
-        self.tool_schemas = [infer_schema_from_function(tool) for tool in tools]
+        self.tool_schemas = [infer_schema_from_function(tool) for tool in tools]##===================================
         self.tools = {tool.__name__: tool for tool in tools}
         
         # Format the system prompt with tool descriptions
-        tool_descriptions = format_tool_descriptions(self.tool_schemas)
+        tool_descriptions = format_tool_descriptions(self.tool_schemas)##===================================
         formatted_prompt = system_prompt.format(tool_descriptions=tool_descriptions)
         
         super().__init__(
             system_prompt=formatted_prompt,
             few_shot=few_shot,
-            mask_env_response=mask_env_response,
+            mask_env_response=mask_env_response,#True
             sampling_args=sampling_args,
             **kwargs
         )
-        self.dataset_name = dataset
-        self.dataset = preprocess_dataset(
+
+
+        self.dataset_name = dataset##triviaqa
+        self.dataset = preprocess_dataset(##===================================
             dataset_name=dataset,
             split="train",
             system_prompt=formatted_prompt,
             few_shot=few_shot
         )
         self.eval_dataset = None
-        self.max_steps = max_steps
-        self.rubric = ToolRubric()
+        self.max_steps = max_steps#2
+        self.rubric = ToolRubric()##===================================
         self.llm_parser = XMLParser(fields=["reasoning", ("tool", "answer")])
         self.env_parser = XMLParser(fields=["result"])
-
     def get_dataset(self, **kwargs: Any) -> Dataset:
         return self.dataset
     
     def get_eval_dataset(self, n: int = -1, **kwargs: Any) -> Dataset | None:
         if self.eval_dataset is None:
-            self.eval_dataset = preprocess_dataset(
+            self.eval_dataset = preprocess_dataset(##===================================
                 dataset_name=self.dataset_name,
                 split="validation",
                 system_prompt=self.system_prompt,
@@ -125,10 +125,16 @@ class ToolEnv(MultiTurnEnv):
         if n > 0:
             return self.eval_dataset.shuffle().select(range(n)) # type: ignore
         return self.eval_dataset
-    
+
+
+    def _______(self):
+        pass
     def get_rubric(self, **kwargs: Any) -> List[RewardFunc]:
-        return self.rubric.get_reward_funcs()
-    
+        return self.rubric.get_reward_funcs()##===================================
+
+
+
+
     def _get_step_count(self, messages: List[Dict[str, str]]) -> int:
         """Count the number of tool uses in the message history, excluding few-shot examples."""
         step_count = 0
@@ -151,12 +157,12 @@ class ToolEnv(MultiTurnEnv):
                 except Exception:
                     pass
         return step_count
-    
     def is_completed(self, messages: List[Dict[str, str]], **kwargs: Any) -> bool:
         try:
             # Check if we've hit max steps by counting tool uses in the message history
-            step_count = self._get_step_count(messages)
-            if step_count >= self.max_steps:
+            #通过计算消息历史记录中的工具使用次数，检查我们是否达到了最大步数
+            step_count = self._get_step_count(messages)##===================================
+            if step_count >= self.max_steps:#2
                 return True
             
             parsed = self.llm_parser.parse(messages[-1]["content"])
@@ -171,17 +177,19 @@ class ToolEnv(MultiTurnEnv):
             command = json.loads(tool_json)
             if not isinstance(command, dict):
                 return "Error: Tool command must be a JSON object"
-            
+
+
             tool_name = command.get("name")
             if not tool_name:
                 return "Error: Tool command must specify 'name'"
-            
             if tool_name not in self.tools:
                 return f"Error: Unknown tool '{tool_name}'"
-            
             tool_func = self.tools[tool_name]
+
+
             tool_args = command.get("args", {})
-            
+
+
             # Call the tool function with arguments
             result = tool_func(**tool_args)
             return str(result)
@@ -189,6 +197,7 @@ class ToolEnv(MultiTurnEnv):
             return "Error: Invalid JSON format"
         except Exception as e:
             return f"Error: {str(e)}"
+
 
     def env_response(self, messages: List[Dict[str, str]], **kwargs: Any) -> Dict[str, str]:
         try:
@@ -203,3 +212,4 @@ class ToolEnv(MultiTurnEnv):
         except Exception:
             pass
         return {"role": "user", "content": "Error: Tool command not found or invalid XML format. Please ensure correct formatting."}
+

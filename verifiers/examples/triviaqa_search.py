@@ -17,7 +17,7 @@ parser.add_argument('--max_steps', type=int, default=200, help='Maximum number o
 parser.add_argument('--beta', type=float, default=0.01, help='Beta parameter for KL divergence (default: 0.01)')
 
 parser.add_argument('--trainer', type=str, default="mt_grpo", choices=["mt_grpo", "grpo"], help='Trainer type (default: mt_grpo)')
-parser.add_argument('--no_turn_reward', action="store_true", help='Use turn reward (default: True)')#3默认用----除非显式指定--no_turn_reward \则不用
+parser.add_argument('--no_turn_reward', action="store_true", help='Use turn reward (default: True)')##默认用turn----除非显式指定--no_turn_reward \则不用
 parser.add_argument('--turn_advantage_coef', type=float, default=1.0, help='Coefficient for turn-level advantage (default: 1.0)')
 args = parser.parse_args()
 
@@ -47,16 +47,15 @@ outcome_reward_funcs = [
     rubric_class.parser.get_xml_reward_func(),
 ]
 
+
 if args.trainer == "mt_grpo":
     run_name = f"{args.trainer}-coef-{args.turn_advantage_coef}-4-outcome-reward-2-turn-reward-max-steps-{args.max_steps}-{model_name.split('/')[-1].lower()}"
-
 elif args.trainer == "grpo":
     if args.no_turn_reward:
         run_name = f"{args.trainer}-4-outcome-reward-no-turn-reward-max-steps-{args.max_steps}-{model_name.split('/')[-1].lower()}"
     else:
         run_name = f"{args.trainer}-4-outcome-reward-2-turn-reward-max-steps-{args.max_steps}-{model_name.split('/')[-1].lower()}"
-
-training_args = vf.get_default_grpo_config(
+training_args = vf.get_default_grpo_config(##===================================
     run_name=run_name,
     num_gpus=args.num_gpus
 )
@@ -67,7 +66,6 @@ training_args.gradient_accumulation_steps = args.grad_accum_steps
 training_args.num_iterations = args.num_iterations
 training_args.max_steps = args.max_steps
 training_args.beta = args.beta
-
 print(f"Training configuration:")
 print(f"  Learning rate: {training_args.learning_rate}")
 print(f"  Num GPUs: {args.num_gpus}")
@@ -80,16 +78,15 @@ print(f"  Beta: {training_args.beta}")
 print(f"  Trainer: {args.trainer}")
 print(f"  No turn reward: {args.no_turn_reward}")
 print(f"  Turn advantage coefficient: {args.turn_advantage_coef}")
-
-
 if args.trainer == "mt_grpo":
     trainer = vf.MTGRPOEnvTrainer(
         model=model,
         processing_class=tokenizer,
+
         env=vf_env,
         turn_reward_funcs=turn_reward_funcs,
         outcome_reward_funcs=outcome_reward_funcs,
-        turn_advantage_coef=args.turn_advantage_coef,
+        turn_advantage_coef=args.turn_advantage_coef,##===================================
         args=training_args,
         train_dataset=train_dataset,
     )
@@ -97,11 +94,14 @@ elif args.trainer == "grpo":
     trainer = vf.GRPOEnvTrainer(
         model=model,
         processing_class=tokenizer,
+
         env=vf_env,
         turn_reward_funcs=turn_reward_funcs,
         outcome_reward_funcs=outcome_reward_funcs,
-        no_turn_reward=args.no_turn_reward,
+        no_turn_reward=args.no_turn_reward, ##GRPO-OR==除非显式指定--no_turn_reward \则不用 ##===================================
+        # no_turn_reward  ## GRPO-MR==默认用turn===================================
         args=training_args,
         train_dataset=train_dataset,
     )
 trainer.train()
+

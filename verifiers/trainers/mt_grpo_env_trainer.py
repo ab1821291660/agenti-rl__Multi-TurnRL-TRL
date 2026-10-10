@@ -28,7 +28,7 @@ if is_wandb_available():
 
 RewardFunc = Union[str, PreTrainedModel, Callable[[List, List], List[float]]]
 
-class MTGRPOEnvTrainer(GRPOEnvTrainer):
+class MTGRPOEnvTrainer(GRPOEnvTrainer):##===================================
     def __init__(
             self,
             model: Union[str, PreTrainedModel],

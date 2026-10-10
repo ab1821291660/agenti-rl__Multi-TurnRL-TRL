@@ -25,14 +25,14 @@ def setup_logging(
     if date_format is None:
         date_format = "%Y-%m-%d %H:%M:%S"
 
+
     # Create a StreamHandler that writes to stderr
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(logging.Formatter(fmt=log_format, datefmt=date_format))
-
     # Get the root logger for the verifiers package
     logger = logging.getLogger("verifiers")
-    logger.setLevel(level.upper())
-    logger.addHandler(handler)
+    logger.setLevel(level.upper())##===================================
+    logger.addHandler(handler)##===================================
 
     # Prevent the logger from propagating messages to the root logger
     logger.propagate = False 

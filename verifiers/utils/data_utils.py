@@ -54,15 +54,15 @@ def preprocess_dataset(dataset_name: str = "gsm8k",
     if dataset_name == "gsm8k":
         dataset: Dataset = load_dataset("openai/gsm8k", "main")[split] # type: ignore
         dataset = dataset.map(lambda x: {
-            "prompt": format_prompt(x["question"], system_prompt, few_shot, fewshot_prob),
-            "answer": extract_hash_answer(x["answer"])
+            "prompt": format_prompt(x["question"], system_prompt, few_shot, fewshot_prob),##===================================
+            "answer": extract_hash_answer(x["answer"])##===================================
         })
         return dataset
     elif dataset_name == "math":
         dataset: Dataset = load_dataset("chiayewken/competition_math")[split] # type: ignore
         dataset = dataset.map(lambda x: {
-            "prompt": format_prompt(x["problem"], system_prompt, few_shot, fewshot_prob),
-            "answer": extract_boxed_answer(x["solution"])
+            "prompt": format_prompt(x["problem"], system_prompt, few_shot, fewshot_prob),##===================================
+            "answer": extract_boxed_answer(x["solution"])##===================================
         })
         return dataset
     elif dataset_name == "openbookqa":
@@ -79,7 +79,7 @@ def preprocess_dataset(dataset_name: str = "gsm8k",
             question = f"Question: {example['question_stem']}\n\nChoices:\n" + "\n".join(formatted_choices)
             return question
         
-        dataset = dataset.map(lambda x: {
+        dataset = dataset.map(lambda x: {##===================================
             "prompt": format_prompt(format_question(x), str(system_prompt) + "\n\nReturn only the letter of the correct answer.", few_shot, fewshot_prob),
             "answer": x["answerKey"]
         })
@@ -90,11 +90,9 @@ def preprocess_dataset(dataset_name: str = "gsm8k",
         
         def format_triviaqa_question(example):
             question_text = example['question']
-            
             question = f"Question: {question_text}\n"
             return question
-        
-        dataset = dataset.map(lambda x: {
+        dataset = dataset.map(lambda x: {##===================================
             "prompt": format_prompt(format_triviaqa_question(x), system_prompt, few_shot, fewshot_prob),
             "answer": x["answer"]["normalized_aliases"]
         })

@@ -132,7 +132,7 @@ class MultiTurnEnv(Environment):
 
         # main loop
         while not all_completed:
-            states = self.step(states, llm, custom_sp)
+            states = self.step(states, llm, custom_sp)##===================================##===================================
             all_completed = all(state["completed"] for state in states)
 
         completion_messages = [s["messages"][s["prompt_messages"]:] for s in states]
