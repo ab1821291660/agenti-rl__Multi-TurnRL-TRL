@@ -106,9 +106,10 @@ class MTGRPOEnvTrainer(GRPOEnvTrainer):##===================================
         outcome_mean_grouped_rewards, outcome_std_grouped_rewards, outcome_advantages = self._compute_normalized_advantages(outcome_rewards, len(prompts))
         combined_mean_grouped_rewards, combined_std_grouped_rewards, combined_advantages = self._compute_normalized_advantages(combined_rewards, len(prompts))
 
-        result_segment_indices = self._find_result_positions(completion_ids, completion_messages)
 
-        advantages = self._assign_advantages(
+        result_segment_indices = self._find_result_positions(completion_ids, completion_messages)##===================================
+
+        advantages = self._assign_advantages(##===================================
             completion_mask, turn_advantages, outcome_advantages, combined_advantages, result_segment_indices
         )
         
@@ -147,7 +148,9 @@ class MTGRPOEnvTrainer(GRPOEnvTrainer):##===================================
             "ref_per_token_logps": ref_per_token_logps,
             "advantages": advantages,
         }
-        
+
+    def _______分段优势(self):
+        pass
     def _find_result_positions(self, completion_ids, completion_messages):
         result_segment_indices = []
         
@@ -207,6 +210,9 @@ class MTGRPOEnvTrainer(GRPOEnvTrainer):##===================================
 
         return assigned_advantages
 
+
+    def _______compute_loss(self):
+        pass
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
         if return_outputs:
             raise ValueError("The GRPOTrainer does not support returning outputs")
